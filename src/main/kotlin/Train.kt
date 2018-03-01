@@ -1,14 +1,14 @@
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
-import org.deeplearning4j.nn.conf.BackpropType
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.Updater
-import org.deeplearning4j.nn.conf.layers.GravesLSTM
-import org.deeplearning4j.nn.conf.layers.RnnOutputLayer
+import org.deeplearning4j.nn.conf.layers.LSTM
 import org.deeplearning4j.nn.weights.WeightInit
-import org.nd4j.linalg.activations.Activation
-import org.nd4j.linalg.lossfunctions.LossFunctions
 
 fun main(args: Array<String>) {
+    val lstmLayer = LSTM.Builder()
+
+            .build()
+
     val conf = NeuralNetConfiguration.Builder()
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
             .iterations(1)
@@ -20,7 +20,11 @@ fun main(args: Array<String>) {
             .updater(Updater.RMSPROP)
             .list()
 
-            .pretrain(false).backprop(true)
+            .layer(0, lstmLayer)
+
+            .pretrain(false)
+            .backprop(true)
             .build()
     println("test")
 }
+
