@@ -17,6 +17,19 @@ fun main(args: Array<String>) {
     val normalizedHourCandles = makeValuesRelative(scaleByHour(candles))
             .map{it.multiplyEverythingBy(1000)}
 
+    println("hello")
+}
+
+fun getNormalizedHourCandlesFromFile(fileName: String): List<Candle> {
+    val lines = Files.readAllLines(Paths.get(Candle::class.java.getResource(fileName).toURI()))
+
+    val candles = lines.asSequence()
+            .map { parseCandle(it) }
+            .toList()
+
+    return makeValuesRelative(scaleByHour(candles))
+            .map { it.multiplyEverythingBy(1000) }
+
 }
 
 fun makeValuesRelative(candles: List<Candle>): List<Candle> {

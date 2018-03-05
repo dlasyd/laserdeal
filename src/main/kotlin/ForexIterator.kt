@@ -12,27 +12,53 @@ class ForexIterator(
         private val evaluationCandles: Int,
         private val batchSize: Int) : DataSetIterator {
 
-    private var startIndex: Int = 0
+    private var nextFeature: Int = 0
+    private var nextLabel: Int = featureCandles
+    private var lastSmallBatchUsed = false
 
     override fun hasNext(): Boolean {
         if (candles.isEmpty())
             return false
 
-        return candles.size - startIndex >= featureCandles + evaluationCandles
+        if (lastSmallBatchUsed)
+            return false
+        else
+            lastSmallBatchUsed = candles.size - (nextFeature + featureCandles + evaluationCandles) < batchSize
+
+
+        return candles.size - nextFeature >= featureCandles + evaluationCandles
     }
 
     override fun next(): DataSet {
-        val features = Nd4j.create(intArrayOf(batchSize, 4, featureCandles), 'f')
 
-        val batch = min(batchSize, candles.size - startIndex)
+        val (newIndex, features) = createINDArray(nextFeature, featureCandles)
+        nextFeature = newIndex
 
+        val (newLabel, labels) = createINDArray(nextLabel, evaluationCandles)
+        nextLabel = newLabel
+
+
+        return DataSet(features, labels)
+    }
+
+    private fun createINDArray(startIndex: Int, numberOfCandles: Int): Pair<Int, INDArray> {
+
+        var startingPoint = startIndex
+        val batch = effectiveBatch(startIndex)
+
+
+        val features = Nd4j.create(intArrayOf(batchSize, 4, numberOfCandles), 'f')
         for (m in 0 until batch) {
-            features.putTemporalCandles(m, candles.slice(startIndex until startIndex + featureCandles))
-            startIndex++
+            features.putTemporalCandles(m, candles.slice(startingPoint until startingPoint + numberOfCandles))
+            startingPoint++
         }
 
-        return DataSet(features, null)
+        return Pair(startingPoint, features)
     }
+
+    private fun effectiveBatch(startIndex: Int) =
+            if (lastSmallBatchUsed) candles.size - startIndex - featureCandles - evaluationCandles
+            else min(batchSize, candles.size - startIndex)
 
     private fun INDArray.putCandle(m: Int, temporal: Int, candle: Candle) {
         this.putScalar(m, 0, temporal, candle.open.toDouble())
