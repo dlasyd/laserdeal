@@ -94,17 +94,17 @@ public class Rnn {
             while(iter.hasNext()){
                 DataSet ds = iter.next();
                 net.fit(ds);
-                if(++miniBatchNumber % generateSamplesEveryNMinibatches == 0){
-                    System.out.println("--------------------");
-                    System.out.println("Completed " + miniBatchNumber + " minibatches of size " + miniBatchSize + "x" + exampleLength + " characters" );
-                    System.out.println("Sampling characters from network given initialization \"" + (generationInitialization == null ? "" : generationInitialization) + "\"");
-                    String[] samples = sampleCharactersFromNetwork(generationInitialization,net,iter,rng,nCharactersToSample,nSamplesToGenerate);
-                    for( int j=0; j<samples.length; j++ ){
-                        System.out.println("----- Sample " + j + " -----");
-                        System.out.println(samples[j]);
-                        System.out.println();
-                    }
-                }
+//                if(++miniBatchNumber % generateSamplesEveryNMinibatches == 0){
+//                    System.out.println("--------------------");
+//                    System.out.println("Completed " + miniBatchNumber + " minibatches of size " + miniBatchSize + "x" + exampleLength + " characters" );
+//                    System.out.println("Sampling characters from network given initialization \"" + (generationInitialization == null ? "" : generationInitialization) + "\"");
+//                    String[] samples = sampleCharactersFromNetwork(generationInitialization,net,iter,rng,nCharactersToSample,nSamplesToGenerate);
+//                    for( int j=0; j<samples.length; j++ ){
+//                        System.out.println("----- Sample " + j + " -----");
+//                        System.out.println(samples[j]);
+//                        System.out.println();
+//                    }
+//                }
             }
 
             iter.reset();	//Reset iterator for another epoch

@@ -1,3 +1,7 @@
+import green.Candle
+import green.makeValuesRelative
+import green.parseCandle
+import green.scaleByHour
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.amshove.kluent.`should equal`

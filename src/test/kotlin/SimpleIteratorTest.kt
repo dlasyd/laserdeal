@@ -1,3 +1,6 @@
+import experiments.SimpleIterator
+import green.Candle
+import green.parseCandle
 import junit.framework.TestCase.assertEquals
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
@@ -8,12 +11,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(JUnitParamsRunner::class)
-class ForexIteratorTest {
+class SimpleIteratorTest {
 
     @Test
     @Parameters(method = "parametersHasNext")
     fun `has next`(candles: List<Candle>, features: Int, evaluation: Int, batchSize: Int, expectedResult: Boolean) {
-        val iterator = ForexIterator(candles, features, evaluation, batchSize)
+        val iterator = SimpleIterator(candles, features, evaluation, batchSize)
         iterator.hasNext() `should be` expectedResult
     }
 
@@ -41,7 +44,7 @@ class ForexIteratorTest {
     @Test
     fun `features dataSet has correct size`(featureCandles: Int, batchSize: Int, a: Int, b: Int, c: Int) {
         val expectedShape = intArrayOf(a, b, c)
-        val iterator = ForexIterator(candles(4), featureCandles, 1, batchSize)
+        val iterator = SimpleIterator(candles(4), featureCandles, 1, batchSize)
 
         val shape: IntArray? = iterator.next().features?.shape()
 
@@ -53,7 +56,7 @@ class ForexIteratorTest {
     @Test
     fun `candle is put to dataSet features correctly for one candle`() {
         val candle = parseCandle("2017.01.02,03:00,1,1.5,-1.5,1.2")
-        val iterator = ForexIterator(listOf(candle), 1, 1, 1)
+        val iterator = SimpleIterator(listOf(candle), 1, 1, 1)
 
         val data = iterator.next().features.data()
 
@@ -67,7 +70,7 @@ class ForexIteratorTest {
     fun `two candles are put to dataSet`() {
         val candle1 = parseCandle("2017.01.02,03:00,1,1.5,-1.5,1.2")
         val candle2 = parseCandle("2017.01.02,03:00,2,2.5,0.5,2.2")
-        val iterator = ForexIterator(listOf(candle1, candle2), 2, 1, 1)
+        val iterator = SimpleIterator(listOf(candle1, candle2), 2, 1, 1)
 
         val data = iterator.next().features.data()
 
@@ -88,7 +91,7 @@ class ForexIteratorTest {
         val candle2 = parseCandle("2017.01.02,03:00,2,2.5,0.5,2.2")
         val candle3 = parseCandle("2017.01.02,03:00,3,3.5,2.5,3.2")
         val candle4 = parseCandle("2017.01.02,03:00,4,4.5,3.5,4.2")
-        val iterator = ForexIterator(listOf(candle1, candle2, candle3, candle4), 2, 1, 2)
+        val iterator = SimpleIterator(listOf(candle1, candle2, candle3, candle4), 2, 1, 2)
 
         val data = iterator.next().features.data()
 
@@ -123,7 +126,7 @@ class ForexIteratorTest {
         val candle2 = parseCandle("2017.01.02,03:00,2,2.5,0.5,2.2")
         val candle3 = parseCandle("2017.01.02,03:00,3,3.5,2.5,3.2")
         val candle4 = parseCandle("2017.01.02,03:00,4,4.5,3.5,4.2")
-        val iterator = ForexIterator(listOf(candle1, candle2, candle3, candle4), 2, 1, 1)
+        val iterator = SimpleIterator(listOf(candle1, candle2, candle3, candle4), 2, 1, 1)
 
         iterator.next()
         val data = iterator.next().features.data()
@@ -147,7 +150,7 @@ class ForexIteratorTest {
             "4,2,1,4|1"
             )
     fun `hasNext after several next() invocations`(candles:Int, feature:Int, eval:Int, batch:Int, correct:Int) {
-        val iterator = ForexIterator(candles(candles), feature, eval, batch)
+        val iterator = SimpleIterator(candles(candles), feature, eval, batch)
 
         var iteratorWasCalled = 0
         while(iterator.hasNext()){
@@ -166,7 +169,7 @@ class ForexIteratorTest {
             "7,2,3,2|2,3"
             )
     fun `labels dataSet has correct size`(amount: Int, feature: Int, eval: Int, batch: Int, m: Int, t: Int) {
-        val iterator = ForexIterator(candles(amount), feature, eval, batch)
+        val iterator = SimpleIterator(candles(amount), feature, eval, batch)
         val expectedShape = intArrayOf(m, 4, t)
 
         val labels = iterator.next().labels
@@ -181,7 +184,7 @@ class ForexIteratorTest {
         val candle3 = parseCandle("2017.01.02,03:00,3,3.5,2.5,3.2")
         val candle4 = parseCandle("2017.01.02,03:00,4,4.5,3.5,4.2")
 
-        val iterator = ForexIterator(listOf(candle1, candle2, candle3, candle4), 1, 1, 1)
+        val iterator = SimpleIterator(listOf(candle1, candle2, candle3, candle4), 1, 1, 1)
 
         var data = iterator.next().labels.data()
         assertEquals(2.0, data.getDouble(0), 0.001)
@@ -198,7 +201,7 @@ class ForexIteratorTest {
 
     @Test
     fun `batch size more than feature candles`() {
-        val iter = ForexIterator(candles(4), 2, 1, 4)
+        val iter = SimpleIterator(candles(4), 2, 1, 4)
 
         while(iter.hasNext()) {
             val dataSet = iter.next()

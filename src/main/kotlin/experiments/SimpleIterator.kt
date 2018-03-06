@@ -1,3 +1,6 @@
+package experiments
+
+import green.Candle
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.DataSet
 
@@ -6,7 +9,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator
 import org.nd4j.linalg.factory.Nd4j
 import kotlin.math.min
 
-class ForexIterator(
+class SimpleIterator(
         private val candles: List<Candle>,
         private val featureCandles: Int,
         private val evaluationCandles: Int,
@@ -44,7 +47,7 @@ class ForexIterator(
     private fun createINDArray(startIndex: Int, numberOfCandles: Int): Pair<Int, INDArray> {
 
         var startingPoint = startIndex
-        val batch = effectiveBatch(startIndex)
+        var batch = effectiveBatch(startIndex)
 
 
         val features = Nd4j.create(intArrayOf(batchSize, 4, numberOfCandles), 'f')

@@ -1,5 +1,5 @@
+import green.Candle
 import org.amshove.kluent.shouldEqual
-import org.junit.Assert.*
 import org.junit.Test
 import java.math.BigDecimal
 import java.time.LocalDateTime
