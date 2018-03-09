@@ -15,7 +15,7 @@ import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 fun main(args: Array<String>) {
-    val iter = SimpleIterator(getNormalizedHourCandlesFromFile("DAT_MT_EURUSD_M1_2017.csv"), 1, 1, 1000)
+    val iter = ForexIterator(getNormalizedHourCandlesFromFile("DAT_MT_EURUSD_M1_2017.csv"), 100, 100, 1)
 
     val lstmLayer = LSTM.Builder()
             .nIn(4)
@@ -54,16 +54,15 @@ fun main(args: Array<String>) {
     }
     println("Total number of network parameters: " + totalNumParams)
 
-    val numEpochs = 10000
+    val numEpochs = 10
 
-    var miniBatchNumber = 0
     val ds = iter.next()
     for (i in 0 until numEpochs) {
-//        while (iter.hasNext()) {
+        while (iter.hasNext()) {
             net.fit(ds)
-//        }
+        }
 
-//        iter.reset()    //Reset iterator for another epoch
+        iter.reset()
     }
 }
 
