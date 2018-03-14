@@ -15,13 +15,21 @@ import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 fun main(args: Array<String>) {
-    val iter = ForexIterator(getNormalizedHourCandlesFromFile("DAT_MT_EURUSD_M1_2017.csv"), 100, 100, 1)
+    val batchSize = 200
+    val evalCandles = 100
+    val trainCandles = 100
+
+    val tranDetls = listOf(TransactionDetail(-5.0, 10.0))
+
+    val iter = ForexIterator(getNormalizedHourCandlesFromFile("DAT_MT_EURUSD_M1_2017.csv"), trainCandles, evalCandles, batchSize, tranDetls)
 
     val lstmLayer = LSTM.Builder()
             .nIn(4)
-            .nOut(3)
+            .nOut(12)
             .activation(Activation.SIGMOID)
             .build()
+
+    val lossFunction = LossFunctions.LossFunction.MEAN_SQUARED_LOGARITHMIC_ERROR
 
     val conf = NeuralNetConfiguration.Builder()
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -34,17 +42,14 @@ fun main(args: Array<String>) {
             .updater(Updater.ADAM)
             .list()
             .layer(0, lstmLayer)
-            .layer(1, RnnOutputLayer.Builder(SimpleLoss()).activation(Activation.SIGMOID)        //MCXENT + softmax for classification
-                    .nIn(3).nOut(1).build())
+            .layer(1, RnnOutputLayer.Builder(lossFunction).nIn(12).nOut(1).build())
             .pretrain(false)
-//            .backprop(true)
-            .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(10).tBPTTBackwardLength(10)
+            .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(1000)
             .build()
     val net = MultiLayerNetwork(conf)
     net.init()
     net.setListeners(ScoreIterationListener(1))
 
-    LossFunctions.LossFunction.MSE
     val layers = net.layers
     var totalNumParams = 0
     for (i in layers.indices) {
@@ -52,14 +57,14 @@ fun main(args: Array<String>) {
         println("Number of parameters in layer $i: $nParams")
         totalNumParams += nParams
     }
-    println("Total number of network parameters: " + totalNumParams)
+
+    println("Total number of network parameters: $totalNumParams")
 
     val numEpochs = 10
 
-    val ds = iter.next()
     for (i in 0 until numEpochs) {
         while (iter.hasNext()) {
-            net.fit(ds)
+            net.fit(iter.next())
         }
 
         iter.reset()

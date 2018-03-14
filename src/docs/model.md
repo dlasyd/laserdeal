@@ -28,3 +28,5 @@
 There are 4 blocks of 3. Only one of them makes sense in any given moment.
 On the first output it is decided whether to buy, or to sell or to do nothing. Max(sigmoid(buy),sigmoid(sell)), both>0
 After that values from appropriate inside-deal section are used.
+
+TODO add flags to change sl and tp

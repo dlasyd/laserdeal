@@ -6,12 +6,14 @@ import org.nd4j.linalg.dataset.api.DataSetPreProcessor
 
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator
 import org.nd4j.linalg.factory.Nd4j
+import kotlin.math.abs
 import kotlin.math.min
 
 class ForexIterator(private val candles: List<Candle>,
                     private val tradingCandles: Int,
                     private val evaluationCandles: Int,
-                    private val batchSize: Int) : DataSetIterator {
+                    private val batchSize: Int,
+                    private val transactionDetails: List<TransactionDetail>) : DataSetIterator {
 
     private var cursor = 0
     private var lastBatch = false
@@ -20,21 +22,32 @@ class ForexIterator(private val candles: List<Candle>,
         get() = tradingCandles + evaluationCandles
 
     override fun next(): DataSet {
-        val data = Nd4j.create(intArrayOf(batchSize, 4, totalCandles), 'f')
-
+        val data = Nd4j.create(intArrayOf(batchSize, 4, tradingCandles), 'f')
+        val labels = Nd4j.create(intArrayOf(batchSize, 1, tradingCandles), 'f')
 
         for (batch in 0 until batchSize) {
 
-            val sublistEnd = min(cursor + totalCandles, candles.size)
+            val calculatedEnd = cursor + tradingCandles
+            val sublistEnd = if (calculatedEnd < candles.size - 1 - evaluationCandles) calculatedEnd else candles.size  - evaluationCandles
             val relevantCandles = candles.subList(cursor, sublistEnd)
+
+            if(relevantCandles.isEmpty())
+                continue
+
+            val td = transactionDetails.first()
+            val evalCandles = candles.subList(sublistEnd, sublistEnd + evaluationCandles)
+            val result = isProfitable(td.stopLoss, td.takeProfit, evalCandles).toDouble()
 
             for ((i, candle) in relevantCandles.withIndex()) {
                 data.putCandle(batch,i,candle)
+                labels.putScalar(batch, 0, i, result)
             }
             cursor++
         }
 
-        return DataSet(data, data)
+
+
+        return DataSet(data, labels)
     }
 
     private fun INDArray.putCandle(batch: Int, temporal: Int, candle: Candle) {
@@ -100,3 +113,6 @@ class ForexIterator(private val candles: List<Candle>,
     }
 
 }
+
+private fun Boolean.toDouble() = if (this) 1.0 else 0.0
+
