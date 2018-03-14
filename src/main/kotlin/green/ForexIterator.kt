@@ -28,7 +28,7 @@ class ForexIterator(private val candles: List<Candle>,
         for (batch in 0 until batchSize) {
 
             val calculatedEnd = cursor + tradingCandles
-            val sublistEnd = if (calculatedEnd < candles.size - 1 - evaluationCandles) calculatedEnd else candles.size  - evaluationCandles
+            val sublistEnd = if (calculatedEnd < candles.size - evaluationCandles) calculatedEnd else candles.size  - evaluationCandles
             val relevantCandles = candles.subList(cursor, sublistEnd)
 
             if(relevantCandles.isEmpty())

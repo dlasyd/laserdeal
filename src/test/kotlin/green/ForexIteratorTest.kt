@@ -157,6 +157,14 @@ class ForexIteratorTest {
         assertEquals(expected, data.getDouble(0), 0.001)
     }
 
+    @Test
+    fun `batch size more than feature candles`() {
+        val iter = ForexIterator(candles(4), 2, 1,4, any)
+
+        while(iter.hasNext()) {
+            val dataSet = iter.next()
+        }
+    }
 
     private fun candles(amount: Int) = List(amount) { parseCandle("2017.01.02,03:00,$it.1,$it.2,$it.3,$it.4") }
     private fun sameCandles(amount: Int) = List(amount) { parseCandle("2017.01.02,03:00,0.1,0.2,0.3,0.4") }
