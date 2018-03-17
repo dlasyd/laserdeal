@@ -7,6 +7,7 @@ import org.amshove.kluent.`should be`
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.nd4j.linalg.api.buffer.DataBuffer
 
 @RunWith(JUnitParamsRunner::class)
 class ForexIteratorTest {
@@ -143,9 +144,9 @@ class ForexIteratorTest {
 
     @Test
     @Parameters(
-            "-1.0,3.0,1,19|1.0",
-            "-1.0,3.0,19,1|0.0",
-            "-1.0,100,1,19|0"
+            "-10.0,30.0,1,19|1.0",
+            "-10.0,30.0,19,1|0.0",
+            "-10.0,1000,1,19|0"
     )
     fun `labels have correct values`(sl:Double, tp:Double, tradingCandles: Int, evaluationCandles: Int, expected: Double) {
         val td = listOf(TransactionDetail(sl, tp))
@@ -162,10 +163,74 @@ class ForexIteratorTest {
         val iter = ForexIterator(candles(4), 2, 1,4, any)
 
         while(iter.hasNext()) {
-            val dataSet = iter.next()
+            iter.next()
         }
     }
 
+    @Test
+    @Parameters(
+            "1,1",
+            "2,1",
+            "1,2",
+            "3,6"
+    )
+    fun `correct feature mask with all ones`(tradingCandles: Int, batch: Int) {
+        val totalCandles = tradingCandles + 1
+        val fi = ForexIterator(candles(totalCandles * batch), tradingCandles, 1, batch, any)
+
+        val next = fi.next()
+
+        val featuresArray = next.featuresMaskArray
+
+        featuresArray.shape() shouldEqual intArrayOf(batch, 1, tradingCandles)
+        featuresArray.data().assertAllOnes()
+    }
+
+    @Test
+    @Parameters(
+            "1,1",
+            "2,1",
+            "5,1",
+            "1,2",
+            "2,2",
+            "2,5",
+            "5,2"
+    )
+    fun `correct label mask, with 1 on last temporal unit`(tradingCandles: Int, batch: Int) {
+        val totalCandles = tradingCandles + 1
+        val fi = ForexIterator(candles(totalCandles * batch), tradingCandles, 1, batch, any)
+
+        val labelsArray = fi.next().labelsMaskArray
+
+        labelsArray.shape() shouldEqual intArrayOf(batch, 1, tradingCandles)
+
+        val data = labelsArray.data()
+
+        data.assertZerosExceptLast(batch)
+        data.assertBatchEndsWithOne(batch)
+    }
+
+    private fun DataBuffer.assertAllOnes() {
+        for (i in 0 until this.length()) {
+            assertEquals(1.0, this.getDouble(i), 0.0001)
+        }
+    }
+
+    private fun DataBuffer.assertZerosExceptLast(batchSize: Int) {
+        for (b in 0 until this.length() - batchSize) {
+            val lastInTimeSeq = this.getDouble(b)
+            assertEquals(0.0, lastInTimeSeq, 0.0001)
+        }
+
+    }
+
+    private fun DataBuffer.assertBatchEndsWithOne(batchSize: Int) {
+        for (b in this.length() - batchSize until this.length()) {
+            val lastInTimeSeq = this.getDouble(b)
+            assertEquals(1.0, lastInTimeSeq, 0.0001)
+        }
+
+    }
+
     private fun candles(amount: Int) = List(amount) { parseCandle("2017.01.02,03:00,$it.1,$it.2,$it.3,$it.4") }
-    private fun sameCandles(amount: Int) = List(amount) { parseCandle("2017.01.02,03:00,0.1,0.2,0.3,0.4") }
 }

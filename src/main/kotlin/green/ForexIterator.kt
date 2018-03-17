@@ -6,8 +6,6 @@ import org.nd4j.linalg.dataset.api.DataSetPreProcessor
 
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator
 import org.nd4j.linalg.factory.Nd4j
-import kotlin.math.abs
-import kotlin.math.min
 
 class ForexIterator(private val candles: List<Candle>,
                     private val tradingCandles: Int,
@@ -24,6 +22,8 @@ class ForexIterator(private val candles: List<Candle>,
     override fun next(): DataSet {
         val data = Nd4j.create(intArrayOf(batchSize, 4, tradingCandles), 'f')
         val labels = Nd4j.create(intArrayOf(batchSize, 1, tradingCandles), 'f')
+        val featureMask = Nd4j.create(intArrayOf(batchSize, 1, tradingCandles), 'f')
+        val labelsMask = Nd4j.create(intArrayOf(batchSize, 1, tradingCandles), 'f')
 
         for (batch in 0 until batchSize) {
 
@@ -41,13 +41,14 @@ class ForexIterator(private val candles: List<Candle>,
             for ((i, candle) in relevantCandles.withIndex()) {
                 data.putCandle(batch,i,candle)
                 labels.putScalar(batch, 0, i, result)
+                featureMask.putScalar(batch, 0, i, 1.0)
             }
+            labelsMask.putScalar(batch, 0, relevantCandles.size - 1, 1.0)
             cursor++
         }
 
 
-
-        return DataSet(data, labels)
+        return DataSet(data, labels, featureMask, labelsMask)
     }
 
     private fun INDArray.putCandle(batch: Int, temporal: Int, candle: Candle) {
@@ -67,7 +68,7 @@ class ForexIterator(private val candles: List<Candle>,
     override fun resetSupported() = true
 
     override fun getLabels(): MutableList<String> {
-        throw NotImplementedError()
+        return mutableListOf("deal1")
     }
 
     override fun cursor(): Int {

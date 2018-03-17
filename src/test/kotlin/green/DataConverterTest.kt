@@ -1,3 +1,5 @@
+package green
+
 import green.Candle
 import green.makeValuesRelative
 import green.parseCandle
@@ -113,7 +115,16 @@ class DataConverterTest {
 
                         listOf(
                                 parseCandle("2017.01.02,03:00,4,9,-4,-6")
-                        ))
+                        )),
+
+                listOf(listOf(
+                        parseCandle("2017.01.02,02:00,1.051550,1.052300,1.051240,1.051530"),
+                        parseCandle("2017.01.02,03:00,1.051520,1.051800,1.048650,1.048880")),
+
+                listOf(
+                        parseCandle("2017.01.02,03:00,4,9,-4,-6")
+                ))
         )
     }
+
 }
