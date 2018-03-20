@@ -68,7 +68,7 @@ class ForexIterator(private val candles: List<Candle>,
     override fun resetSupported() = true
 
     override fun getLabels(): MutableList<String> {
-        return mutableListOf("deal1")
+        return mutableListOf("no deal", "buy")
     }
 
     override fun cursor(): Int {
