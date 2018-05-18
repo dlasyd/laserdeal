@@ -1,9 +1,9 @@
 package green
 
-import green.Candle
-import green.makeValuesRelative
-import green.parseCandle
-import green.scaleByHour
+import green.datamodel.Candle
+import green.lstm.makeValuesRelative
+import green.lstm.parseCandle
+import green.lstm.scaleByMinutes
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.amshove.kluent.`should equal`
@@ -32,7 +32,7 @@ class DataConverterTest {
     @Test
     @Parameters(method = "parameters")
     fun `candles should scale to 1 hour candles`(candles: List<Candle>, scaledCandles: List<Candle>) {
-        scaleByHour(candles) shouldEqual scaledCandles
+        scaleByMinutes(candles) shouldEqual scaledCandles
     }
 
     private fun parameters(): List<List<List<Candle>>> {

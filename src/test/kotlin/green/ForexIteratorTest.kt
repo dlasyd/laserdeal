@@ -1,5 +1,8 @@
 package green
 
+import green.datamodel.TradeDetails
+import green.lstm.ForexIterator
+import green.lstm.parseCandle
 import junit.framework.TestCase.assertEquals
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
@@ -11,7 +14,7 @@ import org.nd4j.linalg.api.buffer.DataBuffer
 
 @RunWith(JUnitParamsRunner::class)
 class ForexIteratorTest {
-    private val any = listOf(TransactionDetail(-1.0, 1.0))
+    private val any = listOf(TradeDetails(-1.0, 1.0, 0, 0))
 
     @Test
     @Parameters(
@@ -149,7 +152,7 @@ class ForexIteratorTest {
             "-10.0,1000,1,19|0"
     )
     fun `labels have correct values`(sl:Double, tp:Double, tradingCandles: Int, evaluationCandles: Int, expected: Double) {
-        val td = listOf(TransactionDetail(sl, tp))
+        val td = listOf(TradeDetails(sl, tp, 0, 0))
         val candles = List(20) { parseCandle("2017.01.02,03:00,0.0,0.7,-0.4,0.5") }
         val fi = ForexIterator(candles, tradingCandles, evaluationCandles, 1, td)
 

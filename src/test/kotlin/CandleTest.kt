@@ -1,4 +1,4 @@
-import green.Candle
+import green.datamodel.Candle
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 import java.math.BigDecimal

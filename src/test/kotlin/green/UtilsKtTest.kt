@@ -1,5 +1,6 @@
 package green
 
+import green.lstm.lastTimeEntries
 import junit.framework.TestCase.assertEquals
 import org.amshove.kluent.`should be`
 import org.junit.Test

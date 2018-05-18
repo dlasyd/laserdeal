@@ -1,6 +1,6 @@
 import experiments.SimpleIterator
-import green.Candle
-import green.parseCandle
+import green.datamodel.Candle
+import green.lstm.parseCandle
 import junit.framework.TestCase.assertEquals
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters

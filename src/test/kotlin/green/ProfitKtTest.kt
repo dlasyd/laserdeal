@@ -1,5 +1,7 @@
 package green
 
+import green.lstm.isProfitable
+import green.lstm.parseCandle
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.amshove.kluent.`should be`

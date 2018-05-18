@@ -1,6 +1,6 @@
 package experiments
 
-import green.Candle
+import green.datamodel.Candle
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.DataSet
 
