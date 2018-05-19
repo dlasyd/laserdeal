@@ -1,5 +1,9 @@
 package green.conv
 
+import green.lossfunc.RAPLossFunction
+import green.lossfunc.prettyLNegative
+import green.lossfunc.prettyLPositive
+import green.lossfunc.totalPositives
 import org.junit.Assert.*
 import org.junit.Test
 import org.nd4j.linalg.factory.Nd4j
@@ -12,7 +16,7 @@ class RAPLossFunctionTest {
         val hingeLosses = Nd4j.create(doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0), intArrayOf(5))
         val labels = Nd4j.create(doubleArrayOf(1.0, 1.0, 1.0, -1.0, -1.0), intArrayOf(5))
 
-        val prettyLPositive = loss.prettyLPositive(hingeLosses, labels)
+        val prettyLPositive = prettyLPositive(hingeLosses, labels)
 
         assertEquals(6.0 , prettyLPositive, 0.0001)
     }
@@ -24,7 +28,7 @@ class RAPLossFunctionTest {
         val hingeLosses = Nd4j.create(doubleArrayOf(1.0, 2.0, 3.0, 4.0, 5.0), intArrayOf(5))
         val labels = Nd4j.create(doubleArrayOf(1.0, 1.0, 1.0, -1.0, -1.0), intArrayOf(5))
 
-        val prettyLNegative = loss.prettyLNegative(hingeLosses, labels)
+        val prettyLNegative = prettyLNegative(hingeLosses, labels)
 
         assertEquals(9.0 , prettyLNegative, 0.0001)
     }
@@ -35,7 +39,7 @@ class RAPLossFunctionTest {
 
         val labels = Nd4j.create(doubleArrayOf(1.0, 1.0, 1.0, -1.0, -1.0), intArrayOf(5))
 
-        assertEquals(3.0,loss.totalPositives(labels), 0.0001)
+        assertEquals(3.0, totalPositives(labels), 0.0001)
 
     }
 }

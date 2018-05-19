@@ -2,6 +2,8 @@ package green.conv
 
 import data.Data
 import green.datamodel.TradeDetails
+import green.lossfunc.PARLossFunction
+import green.lossfunc.RAPLossFunction
 import green.util.calculateMae
 import green.util.calculatePrecision
 import green.util.calculateRecall
@@ -26,7 +28,7 @@ fun main(args: Array<String>) {
 }
 
 private fun train() {
-    val numEpochs = 100
+    val numEpochs = 10
     val lr = .001
     val learningRateLambda = lr/10
     val listener = RapLossListener()
@@ -74,7 +76,7 @@ private fun train() {
                     .build())
             .layer(2, DenseLayer.Builder().activation(Activation.IDENTITY)
                     .nOut(20).build())
-            .layer(3, OutputLayer.Builder(RAPLossFunction(0.5, learningRateLambda, listener))
+            .layer(3, OutputLayer.Builder(PARLossFunction(0.5, learningRateLambda))
                     .nIn(20)
                     .nOut(1)
                     .activation(Activation.TANH).build())

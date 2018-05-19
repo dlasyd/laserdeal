@@ -1,5 +1,7 @@
-package green.conv
+package green.lossfunc
 
+import green.conv.RapLossListener
+import green.conv.asList
 import green.util.calculateMae
 import green.util.calculatePrecision
 import green.util.calculateRecall
@@ -95,7 +97,7 @@ class RAPLossFunction(
     }
 
     private fun gradNum(preOutput: INDArray, activationFn: IActivation, labels: INDArray, mask: INDArray?): INDArray? {
-        val delta = .00005
+        val delta = .05
         val gradsArray = DoubleArray(preOutput.size(0))
 
         val hingeLosses = hingeLoss.computeScoreArray(labels, preOutput.dup(), activationFn, mask)
@@ -131,11 +133,7 @@ class RAPLossFunction(
         val allPositive = totalPositives(labels)
         val constraint = constrain(lPrettyPlus = lPlus, lPrettyMinus = lMinus, allPositive = allPositive, alpha = alpha)
 
-        val oldLoss = lPlus + lambda * constraint
-
-//        val newLoss = (1 + lambda) * lPlus  /* + lambda * alpha /(1-alpha) * lMinus */ - lambda * allPositive
-
-        return oldLoss
+        return lPlus + lambda * constraint
     }
 
     override fun computeScoreArray(labels: INDArray, preOutput: INDArray, activationFn: IActivation, mask: INDArray): INDArray {
@@ -146,19 +144,6 @@ class RAPLossFunction(
         TODO("not yet")
     }
 
-    fun prettyLPositive(hingeLosses: INDArray, labels: INDArray): Double {
-        val isPositiveLabel = labels.dup().add(1).mul(0.5)
-        return hingeLosses.dup().mul(isPositiveLabel).sum(0).getDouble(0)
-    }
-
-    fun prettyLNegative(hingeLosses: INDArray, labels: INDArray): Double {
-        val isNegativeLabel = labels.dup().add(-1).mul(-0.5)
-        return hingeLosses.dup().mul(isNegativeLabel).sum(0).getDouble(0)
-    }
-
-    fun totalPositives(labels: INDArray): Double {
-        return labels.dup().add(1).mul(0.5).sum(0).getDouble(0)
-    }
 
     fun constrain(lPrettyPlus: Double, lPrettyMinus: Double, allPositive: Double, alpha: Double): Double {
         return alpha / (1.0 - alpha) * lPrettyMinus + lPrettyPlus - allPositive
