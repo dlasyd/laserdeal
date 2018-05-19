@@ -1,6 +1,6 @@
 package green.lossfunc
 
-import green.conv.RapLossListener
+import green.conv.LossListener
 import green.conv.asList
 import green.util.calculateMae
 import green.util.calculatePrecision
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 class RAPLossFunction(
         private val alpha: Double,
         private val learningRate: Double,
-        private val listener: RapLossListener?) : ILossFunction {
+        private val listener: LossListener?) : ILossFunction {
 
     var lambda = 0.0
 

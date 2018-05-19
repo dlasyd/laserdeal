@@ -1,6 +1,6 @@
 package green.conv
 
-class RapLossListener {
+class LossListener {
     val lambdaGradient = ArrayList<Double>()
     val lambda = ArrayList<Double>()
     val averageRapLoss = ArrayList<Double>()

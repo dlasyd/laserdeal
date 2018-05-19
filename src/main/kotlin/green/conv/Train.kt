@@ -3,7 +3,6 @@ package green.conv
 import data.Data
 import green.datamodel.TradeDetails
 import green.lossfunc.PARLossFunction
-import green.lossfunc.RAPLossFunction
 import green.util.calculateMae
 import green.util.calculatePrecision
 import green.util.calculateRecall
@@ -28,12 +27,12 @@ fun main(args: Array<String>) {
 }
 
 private fun train() {
-    val numEpochs = 10
-    val lr = .001
-    val learningRateLambda = lr/10
-    val listener = RapLossListener()
+    val numEpochs = 1000
+    val lr = .005
+    val learningRateLambda = lr/1
+    val listener = LossListener()
 
-    val batchSize = 400
+    val batchSize = 200
     val td = TradeDetails(-20.0, 40.0, 1500, 1500)
     val trainFiles = listOf(
             Paths.get(Data::class.java.getResource("DAT_MT_EURUSD_M1_2017.csv").toURI()).toFile()
@@ -76,7 +75,7 @@ private fun train() {
                     .build())
             .layer(2, DenseLayer.Builder().activation(Activation.IDENTITY)
                     .nOut(20).build())
-            .layer(3, OutputLayer.Builder(PARLossFunction(0.5, learningRateLambda))
+            .layer(3, OutputLayer.Builder(PARLossFunction(0.5, learningRateLambda, listener))
                     .nIn(20)
                     .nOut(1)
                     .activation(Activation.TANH).build())
@@ -92,8 +91,9 @@ private fun train() {
 
     printParameters(model)
 
+    val next = iter.next()
     for (i in 0 until numEpochs) {
-        model.fit(iter)
+        model.fit(next)
 
     }
 
@@ -102,7 +102,7 @@ private fun train() {
 //    val predictions = model.output(next.features)
 //    val labels = next.labels
 
-    createGraph(listener.averageRapLoss, "z_averageRapLoss")
+    createGraph(listener.averageRapLoss, "z_loss")
     createGraph(listener.lambda, "z_lambda")
     createGraph(listener.mae, "z_mae")
     createGraph(listener.precision, "z_precision")

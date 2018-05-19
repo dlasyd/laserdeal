@@ -1,5 +1,10 @@
 package green.lossfunc
 
+import green.conv.LossListener
+import green.conv.asList
+import green.util.calculateMae
+import green.util.calculatePrecision
+import green.util.calculateRecall
 import org.nd4j.linalg.activations.IActivation
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
@@ -8,16 +13,26 @@ import org.nd4j.linalg.lossfunctions.LossFunctions
 import org.nd4j.linalg.primitives.Pair
 
 class PARLossFunction(val beta: Double,
-                      val learningRate: Double) : ILossFunction {
+                      val learningRate: Double,
+                      val listener: LossListener?) : ILossFunction {
     private val hingeLoss = LossFunctions.LossFunction.HINGE.iLossFunction
-    private var lambda = 1.0
+    private var lambda = 0.0
 
     override fun computeScore(labels: INDArray, preOutput: INDArray, activationFn: IActivation, mask: INDArray?, average: Boolean): Double {
+        val m = labels.shape()[0]
         val hingeLosses = hingeLoss.computeScoreArray(labels, preOutput.dup(), activationFn, mask)
         val posL = prettyLPositive(hingeLosses, labels)
         val negL = prettyLNegative(hingeLosses, labels)
         val tp = totalPositives(labels)
-        return negL - lambda * (beta + posL / tp - 1)
+
+        val loss = negL - lambda * (beta + posL / tp - 1)
+        listener?.averageRapLoss(loss/m)
+        val labelsList = labels.asList().map { it.toInt() }
+        val inputsList = activationFn.getActivation(preOutput.dup(), false).asList()
+        listener?.mae(calculateMae(inputsList, labelsList))
+        listener?.precision(calculatePrecision(inputsList, labelsList))
+        listener?.recall(calculateRecall(inputsList, labelsList))
+        return loss
     }
 
     override fun computeGradient(labels: INDArray, preOutput: INDArray, activationFn: IActivation, mask: INDArray?): INDArray {
@@ -31,6 +46,8 @@ class PARLossFunction(val beta: Double,
         }.invoke()
 
         lambda += learningRate * lambdaGrad
+        listener?.lambdaGradient(lambdaGrad)
+        listener?.lambda(lambda)
 
         val hingeGrads = hingeLoss.computeGradient(labels, preOutput, activationFn, mask)
         val posLGrad = prettyLPlusGrad(m, labels)
