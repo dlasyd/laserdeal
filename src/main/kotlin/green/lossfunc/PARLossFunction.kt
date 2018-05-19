@@ -25,7 +25,7 @@ class PARLossFunction(val beta: Double,
         val negL = prettyLNegative(hingeLosses, labels)
         val tp = totalPositives(labels)
 
-        val loss = negL - lambda * (beta + posL / tp - 1)
+        val loss = posL - lambda * (beta + negL / tp - 1)
         listener?.averageRapLoss(loss/m)
         val labelsList = labels.asList().map { it.toInt() }
         val inputsList = activationFn.getActivation(preOutput.dup(), false).asList()
@@ -40,9 +40,9 @@ class PARLossFunction(val beta: Double,
 
         val lambdaGrad: Double = {
             val hingeLosses = hingeLoss.computeScoreArray(labels, preOutput.dup(), activationFn, mask)
-            val posL = prettyLPositive(hingeLosses, labels)
+            val negL = prettyLNegative(hingeLosses, labels)
             val tp = totalPositives(labels)
-            beta + posL / tp - 1
+            beta + negL / tp - 1
         }.invoke()
 
         lambda += learningRate * lambdaGrad
@@ -54,7 +54,7 @@ class PARLossFunction(val beta: Double,
         val negLGrad = prettyLMinusGrad(m, labels)
         val tp = totalPositives(labels)
 
-        return posLGrad.mul(lambda / tp).add(negLGrad).mul(hingeGrads)
+        return negLGrad.mul(lambda / tp).add(posLGrad).mul(hingeGrads)
     }
 
     private fun gradNum(preOutput: INDArray, activationFn: IActivation, labels: INDArray, mask: INDArray?): INDArray? {

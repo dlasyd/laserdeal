@@ -75,7 +75,7 @@ private fun train() {
                     .build())
             .layer(2, DenseLayer.Builder().activation(Activation.IDENTITY)
                     .nOut(20).build())
-            .layer(3, OutputLayer.Builder(PARLossFunction(0.5, learningRateLambda, listener))
+            .layer(3, OutputLayer.Builder(PARLossFunction(0.9, learningRateLambda, listener))
                     .nIn(20)
                     .nOut(1)
                     .activation(Activation.TANH).build())
